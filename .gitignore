@@ -1,0 +1,5 @@
+*~
+*.pyc
+wt.cfg
+*.txt
+*.log
