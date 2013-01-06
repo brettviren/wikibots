@@ -146,11 +146,17 @@ class Site(object):
             comp = self.compare(other, pages)
             pages = list(comp[0]) + list(comp[1])
         ret = []
+        titles = set()
         for name in pages:
             src = self.page(name)
+            if not src.exists:
+                continue
+            if src.title in titles:
+                continue
             dst = other.page(name)
             dst.edit(text=prefix + src.getWikiText() + postfix)
             ret.append(dst)
+            titles.add(src.title)
             continue
         return ret
 
