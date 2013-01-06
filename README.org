@@ -1,0 +1,28 @@
+wikibots
+
+* Requirements
+
+ - [[http://code.google.com/p/python-wikitools/][python-wikitools]]
+
+* Usage
+
+The main code is in [[./wt.py]] which bolts on some functionality to the
+underlying wikitools.
+
+* Configuration
+
+URL and authentication information can be stored in a =wt.cfg= file.
+In addition to the =DEFAULT= section a site name can be used to
+indicate an additional stanza.  Example:
+
+#+BEGIN_EXAMPLE
+[DEFAULT]
+username=UserName
+password=secret
+apiurl=http://www.example.com/wiki/api.php
+
+[devel]
+username=DevelName
+password=secret
+apiurl=http://devel.example.com/wiki/api.php
+#+END_EXAMPLE
