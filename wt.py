@@ -154,7 +154,16 @@ class Site(object):
             if src.title in titles:
                 continue
             dst = other.page(name)
-            dst.edit(text=prefix + src.getWikiText() + postfix)
+            if 'Template:' in name:
+                wikitext = src.getWikiText()
+            else:
+                wikitext = prefix + src.getWikiText() + postfix
+            try:
+                dst.edit(text=wikitext)
+            except wikitools.APIError, msg:
+                print 'Error in editing %s' % repr(dst)
+                print msg
+                continue
             ret.append(dst)
             titles.add(src.title)
             continue
@@ -164,6 +173,6 @@ if '__main__' == __name__:
     import sys
     s = Site(sys.argv[1])
     p = s.page(sys.argv[2])
-    print p
+    print repr(p)
 
     
