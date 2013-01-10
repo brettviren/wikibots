@@ -2,6 +2,7 @@
 import wikitools
 
 import os
+import difflib
 from ConfigParser import SafeConfigParser, NoSectionError
 
 class Config(object):
@@ -98,7 +99,7 @@ class Site(object):
             ret[tit] = page['revisions'][-1]['timestamp']
         return ret
 
-    def compare(self, other, pages = None):
+    def compare(self, other, pages = None, ts1=None, ts2=None):
         '''
         Return a 5-tuple of sets of page names that separates the
         given pages into:
@@ -112,8 +113,8 @@ class Site(object):
         if not pages:
             pages = self.all_pages()
 
-        ts1 = self.timestamps(pages)
-        ts2 = other.timestamps(pages)
+        if not ts1: ts1 = self.timestamps(pages)
+        if not ts2: ts2 = other.timestamps(pages)
 
         n1 = set(ts1.keys())
         n2 = set(ts2.keys())
@@ -128,6 +129,37 @@ class Site(object):
                 ret[3].add(name)
             continue
         return ret
+
+    def diff(self, other, pages = None):
+        '''
+        Return a 5-tuple of dictionaries mapping page names to difflib
+        generators (unified_diff() return) giving the difference
+        between self and other.  If no pages are given, differences
+        for all pages are returned.  The 5-tuple is grouped as in
+        .compare().
+
+        The difflib generator has lineterm="".  Supply your own newlines.
+        '''
+        ts1 = self.timestamps(pages)
+        ts2 = other.timestamps(pages)
+
+        five = self.compare(other, pages, ts1=ts1, ts2=ts2)
+        ret = []
+        for page_names in five:
+            bag = dict()
+            for name in page_names:
+                p1 = self.page(name)
+                p2 = other.page(name)
+                ud = difflib.unified_diff(p1.getWikiText().splitlines(),
+                                          p2.getWikiText().splitlines(),
+                                          ts1[name], ts2[name], 
+                                          'a/'+name,'b/'+name,lineterm="")
+                bag[name] = ud
+                continue
+            ret.append(bag)
+            continue
+        return tuple(ret)
+
 
     def copy(self, other, pages = None, prefix = "", postfix = "", force=False):
         '''
